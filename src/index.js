@@ -1,8 +1,7 @@
 import { refs } from './refs/refs';
-import { signUp, signIn, addToDB, getFromDB, logOut } from './api/api';
+import { signUp, signIn, logOut } from './api/api';
 import './styles.css';
-
-// getFromDB();
+import { state } from './data/data';
 
 const user = {
   email: '',
@@ -15,31 +14,26 @@ const resetUser = () => {
 };
 
 const getUserData = e => {
+  if (state) {
+    document.querySelector('.error').textContent = '';
+  }
   const { name, value } = e.target;
   user[name] = value;
 };
 
-// async function signUpData (e) {
-
-// }
-
-const signUpData = async e => {
+const signUpData = e => {
   e.preventDefault();
-  const response = await signUp({ ...user, returnSecureToken: true });
-  const data = { email: response.data.email, localId: response.data.localId };
-  const token = response.data.idToken;
-  addToDB(data, token);
-  refs.signUpForm.reset();
-  resetUser();
+  signUp(user).then(() => {
+    refs.signUpForm.reset();
+    resetUser();
+  });
 };
 
 const signInData = async e => {
   e.preventDefault();
-  const response = await signIn({ ...user, returnSecureToken: true });
-  localStorage.setItem('idToken', JSON.stringify(response.data.idToken));
+  signIn(user);
   refs.signInForm.reset();
   resetUser();
-  getFromDB();
 };
 
 // __signUpForm
@@ -49,4 +43,4 @@ refs.signUpForm.addEventListener('submit', signUpData);
 refs.signInForm.addEventListener('input', getUserData);
 refs.signInForm.addEventListener('submit', signInData);
 // __logout
-refs.logoutButton.addEventListener('click', logOut)
+refs.logoutButton.addEventListener('click', logOut);
